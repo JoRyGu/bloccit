@@ -8,7 +8,25 @@ describe("routes : static", () => {
       request.get(base, (err, res, body) => {
         expect(res.statusCode).toBe(200);
         done();
-      })
-    })
-  })
+      });
+    });
+  });
+
+  describe("GET /marco", () => {
+    it("should return the status code 200", done => {
+      request.get(base + "marco", (err, res, body) => {
+        expect(res.statusCode).toBe(200);
+        done();
+      });
+    });
+
+    it("should return a body that contains 'polo'", done => {
+      request.get(base + 'marco', (err, res, body) => {
+        expect(res.body).toContain("Polo");
+        done();
+      });
+    });
+  });
+
+
 })
