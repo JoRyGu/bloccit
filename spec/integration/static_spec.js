@@ -10,6 +10,13 @@ describe("routes : static", () => {
         done();
       });
     });
+
+    it("should return a body that contains 'Welcome to Bloccit'", done => {
+      request.get(base, (err, res, body) => {
+        expect(res.body).toContain("Welcome to Bloccit");
+        done();
+      })
+    })
   });
 
   describe("GET /marco", () => {
