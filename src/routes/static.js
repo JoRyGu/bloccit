@@ -8,4 +8,6 @@ router.get("/marco", (req, res, next) => {
   res.send("Welcome to Marco Polo's Page!");
 });
 
+router.get("/about", staticController.about);
+
 module.exports = router;
