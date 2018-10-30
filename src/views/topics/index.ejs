@@ -1,24 +1,35 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <% include ../static/partials/head.ejs %>
-  </head>
-  <body>
-    <main class="container">
-      <% include ../static/partials/navbar.ejs %>
 
-      <h1>Topics</h1>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-      <ul class="list-group">
-<!-- #1 -->
-        <% topics.forEach((topic) => { %>
-<!-- #2 -->
-          <li class="list-group-item">
-            <a href="/topics/<%= topic.id %>"> <%= topic.title %> </a>
-          </li>
-        <% }) %>
-      </ul>
+  <title>
+    Topics
+  </title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/css/application.css">
+</head>
 
-    </main>
-  </body>
+<body>
+  <main class="container">
+    <% include ../static/partials/navbar.ejs %>
+
+    <h1>Topics</h1>
+
+    <ul class="list-group">
+      <!-- #1 -->
+      <% topics.forEach((topic) => { %>
+      <!-- #2 -->
+      <li class="list-group-item">
+        <a href="/topics/<%= topic.id %>">
+          <%= topic.title %> </a>
+      </li>
+      <% }) %>
+    </ul>
+
+  </main>
+</body>
+
 </html>
