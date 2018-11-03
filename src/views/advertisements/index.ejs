@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>
+    Advertisements
+  </title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/css/application.css">
+</head>
+
+<body>
+  <main class="container">
+    <h1>Advertisements</h1>
+    <ul class="list-group">
+      <% advertisements.forEach((advertisement) => { %>
+      <li class="list-group-item">
+        <a href="/advertisements/<%= advertisement.id %>">
+          <%= advertisement.title %>
+        </a>
+
+      </li>
+      <% }) %>
+    </ul>
+  </main>
+
+</body>
+
+</html>

@@ -9,5 +9,9 @@ module.exports = {
 
   topics(req, res, next) {
     res.render("topics/index", {title: "Topics"});
+  },
+
+  advertisements(req, res, next) {
+    res.render("advertisements/index", {title: "Advertisements"});
   }
 }
