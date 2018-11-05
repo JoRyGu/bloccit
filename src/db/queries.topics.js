@@ -1,5 +1,5 @@
 const Topic = require("./models").Topic;
-const Post = require('./models').Post;
+const Post = require("./models").Post;
 
 module.exports = {
   async getAllTopics(callback) {
@@ -26,10 +26,12 @@ module.exports = {
   async getTopic(id, callback) {
     try {
       let topic = await Topic.findById(id, {
-        include: [{
-          model: Post,
-          as: "posts"
-        }]
+        include: [
+          {
+            model: Post,
+            as: "posts"
+          }
+        ]
       });
       callback(null, topic);
     } catch (err) {
@@ -46,21 +48,14 @@ module.exports = {
     }
   },
 
-  updateTopic(id, updatedTopic, callback) {
-    return Topic.findById(id).then(topic => {
-      if (!topic) {
-        return callback("Topic not found");
-      }
-      topic
-        .update(updatedTopic, {
-          fields: Object.keys(updatedTopic)
-        })
-        .then(() => {
-          callback(null, topic);
-        })
-        .catch(err => {
-          callback(err);
-        });
-    });
+  async updateTopic(id, updatedTopic, callback) {
+    try {
+      const topic = await Topic.findById(id);
+      if (!topic) return callback("Topic not found");
+      await topic.update(updatedTopic, { fields: Object.keys(updatedTopic) });
+      callback(null, topic);
+    } catch (err) {
+      callback(err);
+    }
   }
 };
