@@ -1,4 +1,5 @@
 const Topic = require("./models").Topic;
+const Post = require('./models').Post;
 
 module.exports = {
   async getAllTopics(callback) {
@@ -24,7 +25,12 @@ module.exports = {
 
   async getTopic(id, callback) {
     try {
-      let topic = await Topic.findById(id);
+      let topic = await Topic.findById(id, {
+        include: [{
+          model: Post,
+          as: "posts"
+        }]
+      });
       callback(null, topic);
     } catch (err) {
       callback(err);
