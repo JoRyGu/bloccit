@@ -10,6 +10,8 @@
   "author": "Josh Gude",
   "license": "ISC",
   "devDependencies": {
+    "eslint": "^5.8.0",
+    "eslint-config-google": "^0.11.0",
     "faker": "^4.1.0",
     "jasmine": "^3.0.0",
     "request": "^2.83.0"

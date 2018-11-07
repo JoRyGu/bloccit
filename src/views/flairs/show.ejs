@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>
+    <%= models.flair.name %>
+  </title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/css/application.css">
+</head>
+
+<body>
+  <% include ../static/partials/navbar.ejs %>
+
+  <main class="container">
+    <h1>
+      <%= models.flair.name %>
+    </h1>
+    <a href="/topics/<%= models.topic.id %>/posts/<%= models.post.id %>/edit" class="btn btn-warning">Edit</a>
+
+    <form style="display:initial" action="/topics/<%= models.topic.id %>/posts/<%= models.post.id %>/flairs/<%= models.flair.id %>/destroy" method="post">
+      <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+
+    <p>
+      <%= models.flair.color %>
+    </p>
+  </main>
+
+  <% include ../static/partials/baseScripts.ejs %>
+
+</body>
+
+</html>
