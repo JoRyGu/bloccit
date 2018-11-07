@@ -87,9 +87,9 @@ describe("routes : posts", () => {
         }).catch(err => {
           console.log(err);
           done();
-        })
-      })
-    })
+        });
+      });
+    });
   });
 
   describe("GET /topics/:topicId/posts/:id", () => {
@@ -163,7 +163,6 @@ describe("routes : posts", () => {
       request.post(options, (err, res, body) => {
         expect(err).toBeNull();
         Post.findOne({ where: { id: this.post.id } }).then(post => {
-          console.log(post.title, post.body);
           expect(post.title).toBe("Snowman Building Competition");
           done();
         });

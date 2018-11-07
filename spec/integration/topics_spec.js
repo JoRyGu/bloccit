@@ -46,15 +46,15 @@ describe("routes : topics", () => {
   });
 
   describe("POST /topics/create", () => {
-    const options = {
-      url: `${base}create`,
-      form: {
-        title: "blink-182 songs",
-        description: "What's your favorite blink-182 song?"
-      }
-    };
-
     it("should create a new topic and redirect", done => {
+      const options = {
+        url: `${base}create`,
+        form: {
+          title: "blink-182 songs",
+          description: "What's your favorite blink-182 song?"
+        }
+      };
+
       request.post(options, (err, res, body) => {
         Topic.findOne({where: {title: "blink-182 songs"}})
         .then(topic => {
@@ -64,6 +64,25 @@ describe("routes : topics", () => {
           done();
         })
         .catch(err => {
+          console.log(err);
+          done();
+        });
+      });
+    });
+
+    it("should not create a new topic if the title is less than 5 character or the description is less than 10 characters", done => {
+      const options = {
+        url: `${base}create`,
+        form: {
+          title: "a",
+          description: "b"
+        }
+      };
+      request.post(options, (err, res, body) => {
+        Topic.findOne({where: {title: "a"}}).then(topic => {
+          expect(topic).toBeNull();
+          done();
+        }).catch(err => {
           console.log(err);
           done();
         });
