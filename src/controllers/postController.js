@@ -1,8 +1,16 @@
 const postQueries = require("../db/queriess.posts");
+const Authorizer = require("../policies/post");
 
 module.exports = {
   new(req, res, next) {
-    res.render("posts/new", { topicId: req.params.topicId });
+    const authorized = new Authorizer(req.user).new();
+
+    if (authorized) {
+      res.render("posts/new", { topicId: req.params.topicId });
+    } else {
+      req.flash("notice", "You must be logged in to do that");
+      res.redirect(`/users/sign_in`);
+    }
   },
 
   create(req, res, next) {
@@ -45,20 +53,27 @@ module.exports = {
   },
 
   edit(req, res, next) {
-    postQueries.getPost(req.params.id, (err, post) => {
-      if (err || post == null) {
-        res.redirect(404, "/");
-      } else {
-        res.render("posts/edit", { post });
-      }
-    });
+    const authorized = new Authorizer(req.user).edit();
+
+    if(authorized) {
+      postQueries.getPost(req.params.id, (err, post) => {
+        if (err || post == null) {
+          res.redirect(404, "/");
+        } else {
+          res.render("posts/edit", { post });
+        }
+      });
+    } else {
+      req.flash("notice", "You are not authorized to do that.");
+      res.redirect('/users/sign_in');
+    }
   },
 
   update(req, res, next) {
     postQueries.updatePost(req.params.id, req.body, (err, post) => {
       if (err || post == null) {
         res.redirect(
-          404,
+          401,
           `/topics/${req.params.topicId}/posts/${req.params.id}/edit`
         );
       } else {

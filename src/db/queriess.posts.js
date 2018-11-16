@@ -1,5 +1,6 @@
 const Post = require("./models").Post;
 const Topic = require("./models").Topic;
+const Authorizer = require("../policies/post");
 
 module.exports = {
   async addPost(newPost, callback) {
@@ -20,25 +21,49 @@ module.exports = {
     }
   },
 
-  async deletePost(id, callback) {
-    try {
-      const deletedPost = Post.destroy({
-        where: { id }
-      });
-      callback(null, deletedPost);
-    } catch (err) {
+  deletePost(id, callback) {
+    return Post.findById(id)
+    .then(post => {
+      const authorized = new Authorizer(req.user, post).destroy();
+
+      if(authorized) {
+        post.destroy()
+        .then(res => {
+          callback(null, post);
+        });
+      } else {
+        req.flash("notice", "You are not authorized to do that.");
+        callback(401);
+      }
+    })
+    .catch(err => {
       callback(err);
-    }
+    });
   },
 
-  async updatePost(id, updatedPost, callback) {
-    try {
-      const post = await Post.findById(id);
-      if(!post) return callback("Post not found");
-      await post.update(updatedPost, { fields: Object.keys(updatedPost) });
-      callback(null, post);
-    } catch (err) {
-      callback(err);
-    }
+  updatePost(id, updatedPost, callback) {
+    return Post.findById(id)
+    .then(post => {
+      if(!post) {
+        return callback("Post not found.");
+      }
+
+      const authorized = new Authorizer(req.user, post).update();
+
+      if(authorized) {
+        post.update(updatedPost, {
+          fields: Object.keys(updatedPost)
+        })
+        .then(() => {
+          callback(null, post);
+        })
+        .catch(err => {
+          callback(err);
+        })
+      } else {
+        req.flash("notice", "You are not authorized to do that.");
+        callback("Forbidden");
+      }
+    })
   }
 };
