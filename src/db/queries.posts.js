@@ -3,26 +3,28 @@ const Topic = require("./models").Topic;
 const Authorizer = require("../policies/post");
 
 module.exports = {
-  async addPost(newPost, callback) {
-    try {
-      const post = await Post.create(newPost);
+  addPost(newPost, callback) {
+    return Post.create(newPost)
+    .then(post => {
       callback(null, post);
-    } catch (err) {
+    })
+    .catch(err => {
       callback(err);
-    }
+    });
   },
 
-  async getPost(id, callback) {
-    try {
-      const post = await Post.findById(id);
-      callback(null, post);
-    } catch (err) {
-      callback(err);
-    }
-  },
-
-  deletePost(id, callback) {
+  getPost(id, callback) {
     return Post.findById(id)
+    .then(post => {
+      callback(null, post);
+    })
+    .catch(err => {
+      callback(err);
+    });
+  },
+
+  deletePost(req, callback) {
+    return Post.findById(req.params.id)
     .then(post => {
       const authorized = new Authorizer(req.user, post).destroy();
 
@@ -41,8 +43,8 @@ module.exports = {
     });
   },
 
-  updatePost(id, updatedPost, callback) {
-    return Post.findById(id)
+  updatePost(req, updatedPost, callback) {
+    return Post.findById(req.params.id)
     .then(post => {
       if(!post) {
         return callback("Post not found.");

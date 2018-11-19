@@ -5,7 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "test": "export NODE_ENV=test && jasmine",
-    "testPosts": "export NODE_ENV=test && jasmine spec/integration/posts_spec.js",
+    "a": "export NODE_ENV=test && jasmine spec/integration/posts2.js",
     "start": "node src/server.js"
   },
   "author": "Josh Gude",

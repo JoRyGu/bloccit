@@ -5,15 +5,12 @@ module.exports = class ApplicationPolicy {
   }
 
   _isOwner() {
+    if(this.user == undefined) return false;
     return this.record && (this.record.userId == this.user.id);
   }
 
   _isMember() {
-    if(this.user.role == "member" || this.user.role == "admin") {
-      return true;
-    } else {
-      return false;
-    }
+    return this.user && this.user.role == "member";
   }
 
   _isAdmin() {
