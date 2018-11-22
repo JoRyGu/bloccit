@@ -1,370 +1,440 @@
-// const request = require("request");
-// const server = require("../../src/server");
-// const base = "http://localhost:3000/topics";
+const request = require("request");
+const server = require("../../src/server");
+const base = "http://localhost:3000/topics";
 
-// const sequelize = require("../../src/db/models/index").sequelize;
-// const Topic = require("../../src/db/models").Topic;
-// const Post = require("../../src/db/models").Post;
-// const User = require("../../src/db/models").User;
+const sequelize = require("../../src/db/models/index").sequelize;
+const Topic = require("../../src/db/models").Topic;
+const Post = require("../../src/db/models").Post;
+const User = require("../../src/db/models").User;
 
-// describe("routes : posts", () => {
-//   beforeEach(done => {
-//     this.topic;
-//     this.post;
-//     this.user;
-//     this.member;
-//     this.memberPost;
+describe("routes : posts", () => {
+  beforeEach(done => {
+    this.topic;
+    this.post;
+    this.user;
 
-//     sequelize.sync({ force: true }).then(res => {
-//       User.create({
-//         email: "starman@tesla.com",
-//         password: "Trekkie4lyfe"
-//       }).then(user => {
-//         this.user = user;
+    sequelize.sync({ force: true }).then(() => {
+      User.create({
+        email: "josh@fake.net",
+        password: "123456"
+      }).then(user => {
+        this.user = user;
 
-//         Topic.create(
-//           {
-//             title: "Winter Games",
-//             description: "Post your Winter Games stories.",
-//             posts: [
-//               {
-//                 title: "Snowball Fighting",
-//                 body: "So much snow!",
-//                 userId: this.user.id
-//               }
-//             ]
-//           },
-//           {
-//             include: {
-//               model: Post,
-//               as: "posts"
-//             }
-//           }
-//         ).then(topic => {
-//           this.topic = topic;
-//           this.post = topic.posts[0];
-//           User.create({
-//             email: "josh@fake.net",
-//             password: "123456"
-//           }).then(user => {
-//             this.member = user;
+        Topic.create({
+          title: "New Topic Title",
+          description: "This is the new topic's description"
+        }).then(topic => {
+          this.topic = topic;
 
-//             Post.create({
-//               title: "New Member Post",
-//               body: "This is a new member post.",
-//               topicId: this.topic.id,
-//               userId: this.member.id
-//             }).then(post => {
-//               this.memberPost = post;
-//               done();
-//             })
-//           })
-//         });
-//       });
-//     });
-//   });
+          Post.create({
+            title: "New Post Title",
+            body: "This is the new post's body",
+            topicId: this.topic.id,
+            userId: this.user.id
+          }).then(post => {
+            this.post = post;
 
-//   describe("guest user performing CRUD actions on a post", () => {
-//     beforeEach(done => {
-//       request.get({
-//         url: "http://localhost3000/auth/fake",
-//         form: {
-//           userId: this.user.id,
-//           role: "guest"
-//         }
-//       });
-//       done();
-//     });
-//     describe("GET /topics/:topicId/posts/:id", () => {
-//       it("should display the post view for the post the guest is trying to access", done => {
-//         request.get(
-//           `${base}/${this.topic.id}/posts/${this.post.id}`,
-//           (err, res, body) => {
-//             expect(err).toBeNull();
-//             expect(body).toContain("Snowball Fighting");
-//             done();
-//           }
-//         );
-//       });
-//     });
+            done();
+          });
+        });
+      });
+    });
+  });
 
-//     describe("GET /topics/:topicId/posts/new", () => {
-//       it("should redirect a guest user to the sign in view", done => {
-//         request.get(`${base}/${this.topic.id}/posts/new`, (err, res, body) => {
-//           expect(err).toBeNull();
-//           expect(body).toContain("Email");
-//           expect(body).toContain("Password");
-//           done();
-//         });
-//       });
-//     });
+  // guest user context (not signed in)
+  describe("CRUD actions taken by a guest user", () => {
+    beforeEach(done => {
+      request.get({
+        url: 'http://localhost:3000/auth/fake',
+        form: {
+          id: 0
+        }
+      }, (err, res, body) => {
+        done();
+      });
+    });
 
-//     describe("POST /topics/:topicId/posts/create", () => {
-//       it("should not create a new topic", done => {
-//         const options = {
-//           url: `${base}/${this.topic.id}/posts/create`,
-//           form: {
-//             title: "Watching snow melt",
-//             body: "It is the best activity."
-//           }
-//         };
-//         request.post(options, (err, res, body) => {
-//           Post.findOne({ where: { title: "Watching snow melt" } })
-//             .then(post => {
-//               expect(post).toBeNull();
-//               done();
-//             })
-//             .catch(err => {
-//               console.log(err);
-//               done();
-//             });
-//         });
-//       });
-//     });
+    // get show (not signed in)
+    describe("GET /topics/:topicId/posts/:id - guest", () => {
+      it("should render a view of the post described by the id", done => {
+        request.get(
+          `${base}/${this.topic.id}/posts/${this.post.id}`,
+          (err, res, body) => {
+            expect(err).toBeNull();
+            expect(body).toContain("New Post Title");
+            expect(body).toContain("This is the new post");
+            done();
+          }
+        );
+      });
+    });
 
-//     describe("GET /topics/:topicId/posts/:id/edit", () => {
-//       it("should redirect the guest user to the sign in page", done => {
-//         request.get(
-//           `${base}/${this.topic.id}/posts/${this.post.id}/edit`,
-//           (err, res, body) => {
-//             expect(err).toBeNull();
-//             expect(body).toContain("Email");
-//             expect(body).toContain("Password");
-//             done();
-//           }
-//         );
-//       });
-//     });
+    // get new (not signed in)
+    describe("GET /topics/:topicId/posts/new - guest", () => {
+      it("should redirect guest user to the sign in view", done => {
+        request.get(`${base}/${this.topic.id}/posts/new`, (err, res, body) => {
+          expect(err).toBeNull();
+          expect(body).toContain("Sign In");
+          done();
+        });
+      });
+    });
 
-//     describe("POST /topics/:topicId/posts/:id/update", () => {
-//       it("should not update the selected post", done => {
-//         const options = {
-//           url: `${base}/${this.topic.id}/posts/${this.post.id}/update`,
-//           form: {
-//             title: "Summer Games"
-//           }
-//         };
+    // post create (not signed in)
+    describe("POST /topics/:topicId/posts/create - guest", () => {
+      it("should not create a new post", done => {
+        const options = {
+          url: `${base}/${this.topic.id}/posts/create`,
+          form: {
+            title: "Hello There",
+            body: "I have not heard that name since the Clone Wars"
+          }
+        };
 
-//         request.post(options, (err, res, body) => {
-//           Post.findOne({ where: { id: this.post.id } }).then(post => {
-//             expect(post.title).toBe("Snowball Fighting");
-//             done();
-//           });
-//         });
-//       });
-//     });
+        request.post(options, (err, res, body) => {
+          Post.findOne({ where: { title: "Hello There" } }).then(post => {
+            expect(err).toBeNull();
+            expect(post).toBeNull();
+            done();
+          });
+        });
+      });
+    });
 
-//     describe("POST /topics/:topicId/posts/:id/destroy", () => {
-//       it("should not destroy the post", done => {
-//         expect(this.topic.posts.length).toBe(1);
-//         request.post(
-//           `${base}/${this.topic.id}/posts/${this.post.id}/destroy`,
-//           (err, res, body) => {
-//             Post.findOne({ where: { id: this.post.id } }).then(post => {
-//               expect(post).not.toBeNull();
-//               done();
-//             });
-//           }
-//         );
-//       });
-//     });
-//   });
+    // get edit (not signed in)
+    describe("GET /topics/:topicId/posts/:id/edit - guest", () => {
+      it("should redirect the guest user back to the sign in view", done => {
+        request.get(
+          `${base}/${this.topic.id}/posts/${this.post.id}/edit`,
+          (err, res, body) => {
+            expect(err).toBeNull();
+            expect(body).toContain("New Post Title");
+            expect(body).toContain("Edit");
+            expect(body).toContain("Delete");
+            expect(body).toContain("This is the new post");
+            done();
+          }
+        );
+      });
+    });
 
-//   describe("Regular member performing CRUD operations on posts", () => {
-//     beforeEach(done => {
+    // post update (not signed in)
+    describe("POST /topics/:topicId/posts/:id/update - guest", () => {
+      it("should not update the existing post", done => {
+        const options = {
+          url: `${base}/${this.topic.id}/posts/${this.post.id}/update`,
+          form: {
+            title: "Scruffy Looking Nerf Herder"
+          }
+        };
 
-//     });
+        request.post(options, (err, res, body) => {
+          Post.findOne({ where: { id: this.post.id } }).then(post => {
+            expect(err).toBeNull();
+            expect(this.post.title).toBe("New Post Title");
+            done();
+          });
+        });
+      });
+    });
 
-//     describe("GET /topics/:topidId/posts/:id", () => {
-//       it("should display the post for a member user", done => {
-//         request.get(
-//           `${base}/${this.topic.id}/posts/${this.post.id}`,
-//           (err, res, body) => {
-//             expect(body).toContain("Snowball Fighting");
-//             expect(body).toContain("So much snow!");
-//             done();
-//           }
-//         );
-//       });
-//     });
+    // post destroy (not signed in)
+    describe("POST /topics/:topicId/posts/:id/destroy - guest", () => {
+      it("should not destroy the existing post", done => {
+        request.post(
+          `${base}/${this.topic.id}/posts/${this.post.id}/destroy`,
+          (err, res, body) => {
+            expect(err).toBeNull();
+            Post.findById(this.topic.id).then(post => {
+              expect(post).not.toBeNull();
+              done();
+            });
+          }
+        );
+      });
+    });
+  });
 
-//     describe("GET /topics/:topicId/posts/new", () => {
-//       it("should display the new topic view for the user", done => {
-//         request.get(`${base}/${this.topic.id}/posts/new`, (err, res, body) => {
-//           expect(body).toContain("New Post");
-//           expect(body).toContain(
-//             "Title must be 2 or more characters in length"
-//           );
-//           done();
-//         });
-//       });
-//     });
+  // correct member user context (signed in but not admin)
+  describe("CRUD operations by a member user", () => {
+    beforeEach(done => {
+      request.get(
+        {
+          url: "http://localhost:3000/auth/fake",
+          form: {
+            id: this.user.id,
+            email: "josh@fake.net",
+            role: "member"
+          }
+        },
+        (err, res, body) => {
+          done();
+        }
+      );
+    });
 
-//     describe("POST /topics/:topicId/posts/create", () => {
-//       it("should create a new post and redirect", done => {
-//         let options = {
-//           url: `${base}/${this.topic.id}/posts/create`,
-//           form: {
-//             title: "I'm a Brand New Post",
-//             body: "I'm probably the best test post ever."
-//           }
-//         };
-//         request.post(options, (err, res, body) => {
-//           Post.findOne({ where: { title: "I'm a Brand New Post" } })
-//             .then(post => {
-//               expect(post).not.toBeNull();
-//               expect(post.title).toBe("I'm a Brand New Post");
-//               expect(post.body).toBe("I'm probably the best test post ever.");
-//               done();
-//             })
-//             .catch(err => {
-//               console.log(err);
-//               done();
-//             });
-//         });
-//       });
-//     });
+    // get new (signed in - member)
+    describe("GET /topics/:topicId/posts/new - member", () => {
+      it("should render a new post view for the member user", done => {
+        request.get(`${base}/${this.topic.id}/posts/new`, (err, res, body) => {
+          expect(err).toBeNull();
+          expect(body).toContain("New Post");
+          done();
+        });
+      });
+    });
 
-//     describe("GET /topics/:topicId/posts/:id/edit", () => {
-//       it("should render the edit post view for the member", done => {
-//         console.log(this.member.email);
-//         done();
-//       });
-//     });
-//   });
+    // post create (signed in - member)
+    describe("POST /topics/:topicId/posts/create - member", () => {
+      it("should create a new post connected to the member for the current topic", done => {
+        const options = {
+          url: `${base}/${this.topic.id}/posts/create`,
+          form: {
+            title: "Obi-Wan Kenobi",
+            body: "He's the best Jedi"
+          }
+        };
 
-//   // describe("GET /topics/:topicId/posts/new", () => {
-//   //   it("should render a new post form", done => {
-//   //     request.get(`${base}/${this.topic.id}/posts/new`, (err, res, body) => {
-//   //       expect(err).toBeNull();
-//   //       expect(body).toContain("New Post");
-//   //       done();
-//   //     });
-//   //   });
-//   // });
+        request.post(options, (err, res, body) => {
+          Post.findOne({ where: { title: "Obi-Wan Kenobi" } }).then(post => {
+            expect(post).not.toBeNull();
+            expect(post.title).toBe("Obi-Wan Kenobi");
+            expect(post.body).toBe("He's the best Jedi");
+          });
+          done();
+        });
+      });
+    });
 
-//   // describe("POST /topics/:topicId/posts/create", () => {
-//   //   it("should create a new post and redirect", done => {
-//   //     const options = {
-//   //       url: `${base}/${this.topic.id}/posts/create`,
-//   //       form: {
-//   //         title: "Watching snow melt",
-//   //         body:
-//   //           "Without a doubt my favorite things to do besides watching paint dry!"
-//   //       }
-//   //     };
-//   //     request.post(options, (req, res, body) => {
-//   //       Post.findOne({ where: { title: "Watching snow melt" } })
-//   //         .then(post => {
-//   //           expect(post).not.toBeNull();
-//   //           expect(post.title).toBe("Watching snow melt");
-//   //           expect(post.body).toBe(
-//   //             "Without a doubt my favorite things to do besides watching paint dry!"
-//   //           );
-//   //           done();
-//   //         })
-//   //         .catch(err => {
-//   //           console.log(err);
-//   //           done();
-//   //         });
-//   //     });
-//   //   });
+    // get edit (signed in - member)
+    describe("GET /topics/:topicId/posts/:id/edit - member", () => {
+      it("should render edit view if member is the same  one that created post", done => {
+        request.get(
+          `${base}/${this.topic.id}/posts/${this.post.id}/edit`,
+          (err, res, body) => {
+            expect(err).toBeNull();
+            expect(body).toContain("Edit Post");
+            done();
+          }
+        );
+      });
+    });
 
-//   //   it("should not create a new post that fails validations", done => {
-//   //     const options = {
-//   //       url: `${base}/${this.topic.id}/posts/create`,
-//   //       form: {
-//   //         title: "a",
-//   //         body: "b"
-//   //       }
-//   //     };
-//   //     request.post(options, (err, res, body) => {
-//   //       Post.findOne({where: {title: "a"}}).then(post => {
-//   //         expect(post).toBeNull();
-//   //         done();
-//   //       }).catch(err => {
-//   //         console.log(err);
-//   //         done();
-//   //       });
-//   //     });
-//   //   });
-//   // });
+    // post update (signed in - member)
+    describe("POST /topics/:topicId/posts/:id/update", () => {
+      it("should update the post if the member is the same one that created post", done => {
+        const options = {
+          url: `${base}/${this.topic.id}/posts/${this.post.id}/update`,
+          form: {
+            title: "Obi-Wan",
+            body: "These blast points...too accurate for sand people"
+          }
+        };
 
-//   // describe("GET /topics/:topicId/posts/:id", () => {
-//   //   it("should render a view with the selected post", done => {
-//   //     request.get(
-//   //       `${base}/${this.topic.id}/posts/${this.post.id}`,
-//   //       (err, res, body) => {
-//   //         expect(err).toBeNull();
-//   //         expect(body).toContain("Snowball Fighting");
-//   //         done();
-//   //       }
-//   //     );
-//   //   });
-//   // });
+        request.post(options, (err, res, body) => {
+          Post.findById(this.post.id).then(post => {
+            expect(post.title).toBe("Obi-Wan");
+            expect(post.body).toBe(
+              "These blast points...too accurate for sand people"
+            );
+            done();
+          });
+        });
+      });
+    });
 
-//   // describe("POST /topics/:topicId/posts/:id/destroy", () => {
-//   //   it("should delete the post with the associated id", done => {
-//   //     expect(this.post.id).toBe(1);
-//   //     request.post(
-//   //       `${base}/${this.topic.id}/posts/${this.post.id}/destroy`,
-//   //       (err, res, body) => {
-//   //         Post.findById(1).then(post => {
-//   //           expect(err).toBeNull();
-//   //           expect(post).toBeNull();
-//   //           done();
-//   //         });
-//   //       }
-//   //     );
-//   //   });
-//   // });
+    // post destroy (signed in - member)
+    describe("POST /topics/:topicId/posts/:id/destroy - member", () => {
+      it("should delete the post if the member is the same one that created the post", done => {
+        request.post(
+          `${base}/${this.topic.id}/posts/${this.post.id}/destroy`,
+          (err, res, body) => {
+            Post.findById(this.post.id).then(post => {
+              expect(post).toBeNull();
+              done();
+            });
+          }
+        );
+      });
+    });
+  });
 
-//   // describe("GET /topics/:topicId/posts/:id/edit", () => {
-//   //   it("should render a view with an edit post form", done => {
-//   //     request.get(
-//   //       `${base}/${this.topic.id}/posts/${this.post.id}/edit`,
-//   //       (err, res, body) => {
-//   //         expect(err).toBeNull();
-//   //         expect(body).toContain("Edit Post");
-//   //         expect(body).toContain("Snowball Fighting");
-//   //         done();
-//   //       }
-//   //     );
-//   //   });
-//   // });
+  // incorrect user context (signed in but not admin)
+  describe("CRUD operations performed by a member user that should not have access to other users' posts", () => {
+    beforeEach(done => {
+      request.get(
+        {
+          url: "http://localhost:3000/auth/fake",
+          form: {
+            id: 7,
+            email: "andy@fake.net",
+            role: "member"
+          }
+        },
+        (err, res, body) => {
+          done();
+        }
+      );
+    });
 
-//   // describe("POST /topics/:topicId/posts/:id/update", () => {
-//   //   it("should return a status code 302", done => {
-//   //     request.post(
-//   //       {
-//   //         url: `${base}/${this.topic.id}/posts/${this.post.id}/update`,
-//   //         form: {
-//   //           title: "Snowman Building Competition",
-//   //           body: "I love watching them melt slowly."
-//   //         }
-//   //       },
-//   //       (err, res, body) => {
-//   //         expect(res.statusCode).toBe(302);
-//   //         done();
-//   //       }
-//   //     );
-//   //   });
+    // get edit - wrong user
+    describe("GET /topics/:topicId/posts/:id/edit", () => {
+      it("should not render the edit view for the wrong user", done => {
+        request.get(
+          `${base}/${this.topic.id}/posts/${this.post.id}/edit`,
+          (err, res, body) => {
+            expect(err).toBeNull();
+            expect(body).toContain("Delete");
+            expect(body).toContain("Edit");
+            expect(body).toContain("New Post Title");
+            done();
+          }
+        );
+      });
+    });
 
-//   //   it("should update the post with the given value", done => {
-//   //     const options = {
-//   //       url: `${base}/${this.topic.id}/posts/${this.post.id}/update`,
-//   //       form: {
-//   //         title: "Snowman Building Competition",
-//   //         body: "This is a new body"
-//   //       }
-//   //     };
-//   //     request.post(options, (err, res, body) => {
-//   //       expect(err).toBeNull();
-//   //       Post.findOne({ where: { id: this.post.id } }).then(post => {
-//   //         expect(post.title).toBe("Snowman Building Competition");
-//   //         done();
-//   //       });
-//   //     });
-//   //   });
-//   // });
-// });
+    // post update - wrong user
+    describe("POST /topics/:topicId/posts/:id/update", () => {
+      it("should not update the post for the wrong user", done => {
+        const options = {
+          url: `${base}/${this.topic.id}/posts/${this.post.id}/update`,
+          form: {
+            title: "Obi-Wan",
+            body:
+              "The sand people are easily startled, but they will soon be back, and in greater numbers"
+          }
+        };
+
+        request.post(options, (err, res, body) => {
+          Post.findById(this.post.id).then(post => {
+            expect(post.title).toBe("New Post Title");
+            done();
+          });
+        });
+      });
+    });
+
+    // post destroy - wrong user
+    describe("POST /topics/:topicId/posts/:id/destroy", () => {
+      it("should not delete the post for the wrong user", done => {
+        request.post(
+          `${base}/${this.topic.id}/posts/${this.post.id}/destroy`,
+          (err, res, body) => {
+            Post.findById(this.post.id).then(post => {
+              expect(post).not.toBeNull();
+              done();
+            });
+          }
+        );
+      });
+    });
+  });
+
+  // admin context (signed in as admin)
+  describe("CRUD operations performed as admin user", () => {
+    beforeEach(done => {
+      User.create({
+        email: 'palpatine@deathstar.net',
+        password: '123456'
+      })
+      .then(user => {
+        request.get({
+          url: 'http://localhost:3000/auth/fake',
+          form: {
+            id: user.id,
+            email: user.email,
+            role: 'admin'
+          }
+        }, (err, res, body) => {
+          done();
+        })
+      })
+    });
+
+    // get new - admin
+    describe("GET /topics/:topicId/posts/new", () => {
+      it("should render a new post view for the admin user", done => {
+        request.get(`${base}/${this.topic.id}/posts/new`, (err, res, body) => {
+          expect(err).toBeNull();
+          expect(body).toContain("New Post");
+          expect(body).toContain("Submit");
+          done();
+        });
+      });
+    });
+
+    // post create - admin
+    describe("POST /topics/:topicId/posts/create", () => {
+      it("should create a new post for the admin user", done => {
+        const options = {
+          url: `${base}/${this.topic.id}/posts/create`,
+          form: {
+            title: "Obi-Wan",
+            body:
+              "Mos Eisley spaceport. You will never find a more wretched hive of scum and villainy."
+          }
+        };
+
+        request.post(options, (err, res, body) => {
+          expect(err).toBeNull();
+          Post.findOne({ where: { title: 'Obi-Wan'} })
+          .then(post => {
+            expect(post.title).toBe('Obi-Wan');
+            expect(post.body).toBe('Mos Eisley spaceport. You will never find a more wretched hive of scum and villainy.');
+            done();
+          })
+        });
+      });
+    });
+
+    // get edit - admin
+    describe("GET /topics/:topicId/posts/:id/edit", () => {
+      it("should render the edit view for the topic selected by the admin user", done => {
+        request.get(
+          `${base}/${this.topic.id}/posts/${this.post.id}/edit`,
+          (err, res, body) => {
+            expect(err).toBeNull();
+            expect(body).toContain('Edit Post');
+            done();
+          }
+        );
+      });
+    });
+
+    // post update - admin
+    describe('POST /topics/:topicId/posts/:id/update', () => {
+      it('should update the post for the topic selected by the admin user', done => {
+        const options = {
+          url: `${base}/${this.topic.id}/posts/${this.post.id}/update`,
+          form: {
+            title: 'Luke Skywalker',
+            body: 'Use the force Luke'
+          }
+        };
+
+        request.post(options, (err, res, body) => {
+          Post.findById(this.post.id)
+          .then(post => {
+            expect(post.title).toBe('Luke Skywalker');
+            expect(post.body).toBe('Use the force Luke');
+            done();
+          });
+        });
+      });
+    });
+
+    // post destroy - admin
+    describe('POST /topics/:topicId/posts/:id/destroy', () => {
+      it('should delete the post for the topic selected by the admin user', done => {
+        request.post(`${base}/${this.topic.id}/posts/${this.post.id}/destroy`, (err, res, body) => {
+          expect(err).toBeNull();
+          Post.findById(this.topic.id)
+          .then(post => {
+            expect(post).toBeNull();
+            done();
+          })
+        })
+      })
+    })
+  });
+});

@@ -1,38 +1,57 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title><%= post.title %></title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="/css/application.css" />
+  </head>
 
-  <title>
-    <%= post.title %>
-  </title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="/css/application.css">
-</head>
+  <body>
+    <% include ../static/partials/navbar.ejs %>
 
-<body>
-  <% include ../static/partials/navbar.ejs %>
-
-  <main class="container">
+    <main class="container">
       <% include ../static/partials/messages.ejs %>
-    <h1>
-      <%= post.title %>
-    </h1>
-    <a href="/topics/<%= post.topicId %>/posts/<%= post.id %>/edit" class="btn btn-warning">Edit</a>
+      <h1><%= post.title %></h1>
+      <a
+        href="/topics/<%= post.topicId %>/posts/<%= post.id %>/edit"
+        class="btn btn-warning"
+        >Edit</a
+      >
 
-    <form style="display:initial" action="/topics/<%= post.topicId %>/posts/<%= post.id %>/destroy" method="post">
-      <button type="submit" class="btn btn-danger">Delete</button>
-    </form>
+      <form
+        style="display:initial"
+        action="/topics/<%= post.topicId %>/posts/<%= post.id %>/destroy"
+        method="post"
+      >
+        <button type="submit" class="btn btn-danger">Delete</button>
+      </form>
 
-    <p>
-      <%= post.body %>
-    </p>
-  </main>
+      <p><%= post.body %></p>
 
-  <% include ../static/partials/baseScripts.ejs %>
+      <section id="comment-form">
+        <% if(currentUser) { %>
+          <% include ../comments/new.ejs %>
+        <% } %>
+      </section>
 
-</body>
+      <section id="comment-list">
+        <% if(post.comments) { %>
+          <% post.comments.forEach((comment) => { %>
+            <%- include('../comments/show.ejs', { comment }) %>
+          <% }) %>
+        <% } %>
+      </section>
+    </main>
 
+    <% include ../static/partials/baseScripts.ejs %>
+  </body>
 </html>
