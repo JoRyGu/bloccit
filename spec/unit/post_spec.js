@@ -2,40 +2,51 @@ const sequelize = require("../../src/db/models/index").sequelize;
 const Topic = require("../../src/db/models").Topic;
 const Post = require("../../src/db/models").Post;
 const User = require("../../src/db/models").User;
+const Vote = require('../../src/db/models').Vote;
 
 describe("Post", () => {
   beforeEach(done => {
     this.topic;
     this.post;
     this.user;
+    this.vote;
 
     sequelize.sync({force: true})
     .then(res => {
       User.create({
-        email: "starman@tesla.com",
-        password: "Trekkie4lyfe"
+        email: 'starman@tesla.com',
+        password: 'Trekkie4lyfe'
       })
       .then(user => {
         this.user = user;
 
         Topic.create({
-          title: "Expeditions to Alpha Centauri",
-          description: "A compilation of reports from recent visits to the star system",
-          posts: [{
-            title: "My first visit to Proxima Centauri b",
-            body: "I saw some rocks",
-            userId: this.user.id
-          }]
-        }, {
-          include: {
-            model: Post,
-            as: "posts"
-          }
+          title: 'Expeditions to Alpha Centauri',
+          description: 'A compilation of reports from recent visits to the star system.'
         })
         .then(topic => {
           this.topic = topic;
-          this.post = topic.posts[0];
-          done();
+
+          Post.create({
+            title: 'All the Cats',
+            body: 'Cats are really cool.',
+            topicId: this.topic.id,
+            userId: this.user.id,
+            votes: [{
+              value: 1,
+              userId: this.user.id
+            }]
+          }, {
+            include: {
+              model: Vote,
+              as: 'votes'
+            }
+          })
+          .then(post => {
+            this.post = post;
+            this.vote = this.post.votes[0];
+            done();
+          })
         })
       })
     })
@@ -131,6 +142,28 @@ describe("Post", () => {
         expect(associatedUser.email).toBe("starman@tesla.com");
         done();
       })
+    })
+  })
+
+  describe("#getPoints()", () => {
+    it("should return the number of upvotes a post has", done => {
+      expect(this.post.getPoints()).toBe(1);
+      done();
+    })
+  })
+
+  describe("#hasUpvoteFor()", () => {
+    it("should return true if the post has an upvote from the user already associated with it", done => {
+      console.log(this.post.hasUpvoteFor(this.user.id));
+      expect(this.post.hasUpvoteFor(this.user.id)).toBe(true);
+      done();
+    })
+  })
+
+  describe("#hasDownvoteFor()", () => {
+    it("should return true if the post has an upvote from the user already associated with it", done => {
+      expect(this.post.hasDownvoteFor(this.user.id)).toBe(false);
+      done();
     })
   })
 });

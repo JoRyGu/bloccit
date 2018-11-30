@@ -20,6 +20,7 @@ module.exports = {
       if(next) { next() }
     }
 
+
     function route(req, res) {
       res.redirect("/");
     }

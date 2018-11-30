@@ -5,7 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "test": "export NODE_ENV=test && jasmine",
-    "a": "export NODE_ENV=test && jasmine spec/integration/comments_spec.js",
+    "a": "export NODE_ENV=test && jasmine spec/integration/votes_spec.js",
     "rollback": "sequelize db:migrate:undo:all && sequelize db:migrate:undo:all --env test",
     "migrate": "sequelize db:migrate && sequelize db:migrate --env test",
     "start": "node src/server.js"

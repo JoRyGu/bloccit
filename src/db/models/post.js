@@ -42,7 +42,37 @@ module.exports = (sequelize, DataTypes) => {
     Post.hasMany(models.Comment, {
       foreignKey: 'postId',
       as: 'comments'
+    });
+
+    Post.hasMany(models.Vote, {
+      foreignKey: 'postId',
+      as: 'votes'
     })
   };
+
+  Post.prototype.getPoints = function() {
+    if(!this.votes || this.votes.length === 0) {
+      return 0;
+    }
+
+    return this.votes.map(v => v.value).reduce((prev, next) => prev + next);
+  }
+
+  Post.prototype.hasUpvoteFor = function(userId) {
+    if(!this.votes || this.votes.length === 0) {
+      return false;
+    }
+
+    return this.votes.filter(vote => vote.userId === userId && vote.value === 1).length > 0;
+  }
+
+  Post.prototype.hasDownvoteFor = function(userId) {
+    if(!this.votes || this.votes.length === 0) {
+      return false;
+    }
+
+    return this.votes.filter(vote => vote.userId === userId && vote.value === -1).length > 0;
+  }
+
   return Post;
 };
