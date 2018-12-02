@@ -2,6 +2,9 @@ const request = require('request');
 const server = require('../../src/server');
 const base = 'http://localhost:3000/users/';
 const User = require('../../src/db/models').User;
+const Topic = require('../../src/db/models').Topic;
+const Post = require('../../src/db/models').Post;
+const Comment = require('../../src/db/models').Comment;
 const sequelize = require('../../src/db/models/index').sequelize;
 
 describe("routes : users", () => {
@@ -12,6 +15,58 @@ describe("routes : users", () => {
       console.log(err);
       done();
     });
+  });
+
+  describe('GET /users/:userId', () => {
+    beforeEach(done => {
+      this.user;
+      this.post;
+      this.comment;
+
+      User.create({
+        email: 'starman@tesla.com',
+        password: 'Trekkie4lyfe'
+      })
+      .then(user => {
+        this.user = user;
+
+        Topic.create({
+          title: 'Winter Games',
+          description: 'Post your winter games stories.',
+          posts: [{
+            title: 'Snowball Fighting',
+            body: 'So much snow!',
+            userId: this.user.id
+          }]
+        }, {
+          include: {
+            model: Post,
+            as: 'posts'
+          }
+        })
+        .then(topic => {
+          this.post = topic.posts[0];
+
+          Comment.create({
+            body: 'This comment is alright.',
+            postId: this.post.id,
+            userId: this.user.id
+          })
+          .then(comment => {
+            this.comment = comment;
+            done();
+          });
+        });
+      });
+    });
+
+    it('should present a list of comments and posts a user has created', done => {
+      request.get(`${base}${this.user.id}`, (err, res, body) => {
+        expect(body).toContain('Snowball Fighting');
+        expect(body).toContain('This comment is alright.');
+        done();
+      })
+    })
   });
 
   describe("GET /users/sign_up", () => {
