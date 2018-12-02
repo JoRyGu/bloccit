@@ -154,7 +154,6 @@ describe("Post", () => {
 
   describe("#hasUpvoteFor()", () => {
     it("should return true if the post has an upvote from the user already associated with it", done => {
-      console.log(this.post.hasUpvoteFor(this.user.id));
       expect(this.post.hasUpvoteFor(this.user.id)).toBe(true);
       done();
     })
